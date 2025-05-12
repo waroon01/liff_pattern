@@ -25,6 +25,9 @@
         <button id="ScanBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
           📷 Scan QR
         </button>
+        <button id="PermalinkBtn" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+          🔗 Permanent Link
+        </button>
         <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
           🔒 Logout
         </button>
@@ -110,11 +113,13 @@
         try {
           if (liff.isInClient()) {
             await liff.sendMessages([flex]);
-            Swal.fire("✅ ส่งข้อความแล้ว", "", "success");
+            await Swal.fire("✅ ส่งข้อความแล้วจ้า", "", "success");
+              liff.closeWindow();
           } else {
             const result = await liff.shareTargetPicker([flex]);
             if (result) {
-              Swal.fire("✅ แชร์สำเร็จ!", "", "success");
+              await Swal.fire("✅ แชร์สำเร็จ!", "", "success");
+              liff.closeWindow();
             } else {
               Swal.fire("❌ ยกเลิกการแชร์", "", "info");
             }
@@ -138,6 +143,28 @@
           Swal.fire("เกิดข้อผิดพลาด", error.message, "error");
         }
       });
+
+
+    document.getElementById("PermalinkBtn").addEventListener("click", async () => {
+      try {
+        const url = await liff.permanentLink.createUrlBy("https://localhost:9000");
+        console.log(url)
+
+        await Swal.fire({
+          title: "🔗 Permanent Link",
+          html: `<input type="text" id="permaLink" class="swal2-input" value="${url}" readonly>
+                <button class="swal2-confirm swal2-styled" onclick="navigator.clipboard.writeText('${url}')">📋 Copy</button>`,
+          showConfirmButton: false
+        });
+      } catch (err) {
+        console.error("Create permalink failed", err);
+        Swal.fire("เกิดข้อผิดพลาด", err.message, "error");
+      }
+    });
+
+
+
+
     </script>
   </body>
 </html>
