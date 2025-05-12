@@ -17,6 +17,8 @@
       <h2 id="profileName" class="text-lg sm:text-xl font-semibold"></h2>
       <h2 id="profileEmail" class="text-sm sm:text-base text-gray-600"></h2>
       <h2 id="profileStatus" class="text-sm sm:text-base text-gray-600 mb-4"></h2>
+      <h2 id="os" class="text-sm sm:text-base text-gray-600 mb-4"></h2>
+      <h2 id="language" class="text-sm sm:text-base text-gray-600 mb-4"></h2>
 
       <div class="flex flex-col gap-2">
         <button id="ShareBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
@@ -60,11 +62,19 @@
 
             const profile = await liff.getProfile();
             const idToken = liff.getDecodedIDToken();
+            const os = liff.getOS();
+            const language = liff.getLanguage();
+            const idTokenTrue = liff.getIDToken();
+            console.log("idToken ",idTokenTrue)
+            console.log("dectoken ",idToken)
+
 
             $("#profileImage").attr("src", idToken.picture);
             $("#profileName").text(`สวัสดี ${profile.displayName}`);
             $("#profileEmail").text(`${idToken.email}`);
             $("#profileStatus").text(`สถานะ: ${profile.statusMessage ?? "-"}`);
+            $("#language").text(`สถานะ: ${os ?? "-"}`);
+            $("#os").text(`สถานะ: ${language ?? "-"}`);
             $("#profile").removeClass("hidden");
 
             $("#logoutBtn").on("click", () => {
