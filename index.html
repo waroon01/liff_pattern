@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>LIFF Demo</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  </head>
+  <body
+    class="bg-gray-100 flex flex-col items-center justify-center min-h-screen text-center"
+  >
+    <h1 class="text-3xl font-bold mb-6">👋 Hello LIFF</h1>
+
+    <!-- Profile Display -->
+    <div id="profile" class="hidden bg-white shadow-lg rounded-xl p-6 w-80">
+      <img
+        id="profileImage"
+        src=""
+        alt="Profile"
+        class="rounded-full w-24 h-24 mx-auto mb-4"
+      />
+      <h2 id="profileName" class="text-xl font-semibold"></h2>
+      <h2 id="profileEmail" class="text-xl font-semibold"></h2>
+      <h2 id="profileStatus" class="text-xl font-semibold"></h2>
+      <button
+        id="ShareBtn"
+        class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+      >
+        Share
+      </button>
+      <button
+        id="logoutBtn"
+        class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+      >
+        Logout
+      </button>
+    </div>
+
+    <script>
+          const liffId = "1657704109-x2l3rrY0";
+
+          $(document).ready(() => {
+            initializeLiff(liffId);
+          });
+
+const initializeLiff = async (liffId) => {
+  liff.init({ liffId }, async () => {
+    liff.ready.then(async () => { // ✅ เพิ่ม async ตรงนี้
+      if (!liff.isLoggedIn()) {
+        const result = await Swal.fire({
+          icon: 'info',
+          title: 'เข้าสู่ระบบ',
+          text: 'กรุณาเข้าสู่ระบบบัญชี LINE ของคุณ',
+          confirmButtonText: 'เข้าสู่ระบบ',
+          allowOutsideClick: false
+        });
+
+        if (result.isConfirmed) {
+          liff.login({ redirectUri: location.href });
+        }
+        return;
+      }
+
+      const profile = await liff.getProfile();
+      const idToken = liff.getDecodedIDToken();
+
+      $("#profileImage").attr("src", idToken.picture);
+      $("#profileName").text(`สวัสดี ${profile.displayName}`);
+      $("#profileEmail").text(`${idToken.email}`);
+      $("#profileStatus").text(`สถานะ: ${profile.statusMessage ?? "-"}`);
+      $("#profile").removeClass("hidden");
+
+      $("#logoutBtn").on("click", () => {
+        liff.logout();
+        location.reload();
+      });
+    });
+  });
+};
+
+
+
+
+document.getElementById("ShareBtn").addEventListener("click", async () => {
+  const flex = {
+    type: "flex",
+    altText: "ส่งความห่วงใยผ่าน LIFF 💚",
+    contents: {
+      type: "bubble",
+      hero: {
+        type: "image",
+        url: "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+        size: "full",
+        aspectRatio: "20:13",
+        aspectMode: "cover"
+      },
+      body: {
+        type: "box",
+        layout: "vertical",
+        contents: [
+          {
+            type: "text",
+            text: "สวัสดีจาก LIFF!",
+            weight: "bold",
+            size: "xl"
+          },
+          {
+            type: "text",
+            text: "ขอให้มีวันที่ดีนะครับ 😊",
+            size: "md",
+            color: "#888888",
+            margin: "md"
+          }
+        ]
+      }
+    }
+  };
+
+  try {
+    if (liff.isInClient()) {
+      // ใช้ในแอป LINE → sendMessage ไปยังห้องแชทปัจจุบัน
+      await liff.sendMessages([flex]);
+      Swal.fire("✅ ส่งข้อความแล้ว", "", "success");
+    } else {
+      // ใช้นอก LINE → เปิดหน้าต่างให้เลือกผู้รับ
+      const result = await liff.shareTargetPicker([flex]);
+      if (result) {
+        Swal.fire("✅ แชร์สำเร็จ!", "", "success");
+      } else {
+        Swal.fire("❌ ยกเลิกการแชร์", "", "info");
+      }
+    }
+  } catch (err) {
+    console.error("Send/share failed", err);
+    Swal.fire("เกิดข้อผิดพลาด", err.message, "error");
+  }
+});
+
+
+    </script>
+  </body>
+</html>
